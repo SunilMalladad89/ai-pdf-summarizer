@@ -29,6 +29,26 @@ An AI-powered Django web application that extracts information from PDF document
 - Requests
 - python-dotenv
 
+
+## Application Screenshots
+
+### 1. Home Page and PDF Upload
+
+![AI PDF Summarizer home page](screenshots/home.png)
+
+### 2. Extracted Text and Summary
+
+![Extracted PDF text and generated summary](screenshots/summary.png)
+
+### 3. Keyword Extraction
+
+![Extracted keywords](screenshots/keywords.png)
+
+### 4. Question Answering
+
+![PDF question answering interface](screenshots/question-answering.png)
+
+
 ## Installation
 
 ### 1. Clone the repository
