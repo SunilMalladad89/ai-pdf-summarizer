@@ -1,0 +1,8 @@
+Django
+pdfplumber
+yake
+scikit-learn
+requests
+python-dotenv
+reportlab
+google-generativeai

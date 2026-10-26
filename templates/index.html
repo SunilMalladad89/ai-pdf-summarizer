@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Powered PDF Summarization System</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body{
+            background:#f4f7fc;
+        }
+
+        .header{
+            background:linear-gradient(135deg,#0d6efd,#6610f2);
+            color:white;
+            padding:30px;
+            border-radius:15px;
+            margin-bottom:20px;
+            text-align:center;
+        }
+
+        .card{
+            border:none;
+            border-radius:15px;
+            box-shadow:0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        textarea{
+            resize:none;
+        }
+
+        .keyword-badge{
+            margin:4px;
+        }
+
+        .stats-card{
+            text-align:center;
+            padding:15px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container mt-4">
+
+    <div class="header">
+        <h1>AI-Powered PDF Summarization & Question Answering System</h1>
+        <p>PDF Analysis, Intelligent Summarization, Keyword Extraction and AI-Based Document Q&A</p>
+    </div>
+
+    <!-- Statistics -->
+
+    <div class="row mb-4">
+
+        <div class="col-md-3">
+            <div class="card stats-card">
+                <h5>Total Pages</h5>
+                <h2>{{ page_count }}</h2>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card stats-card">
+                <h5>Total Words</h5>
+                <h2>{{ word_count }}</h2>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card stats-card">
+                <h5>Characters</h5>
+                <h2>{{ char_count }}</h2>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card stats-card">
+                <h5>Keywords</h5>
+                <h2>{{ keyword_count }}</h2>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Upload Section -->
+
+    {% if error_message %}
+    <div class="alert alert-danger">
+            {{ error_message }}
+    </div>
+    {% endif %}
+
+    <div class="card p-4 mb-4">
+
+        <form method="post" enctype="multipart/form-data">
+
+            {% csrf_token %}
+
+            <div class="mb-3">
+                <label class="form-label">Upload PDF File</label>
+                <input
+                    type="file"
+                    name="pdf_file"
+                    class="form-control"
+                    required
+                >
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Summary Type</label>
+
+                <select class="form-select" name="summary_type">
+                    <option value="short">Short Summary</option>
+                    <option value="medium">Medium Summary</option>
+                    <option value="detailed">Detailed Summary</option>
+                </select>
+            </div>
+
+            <button class="btn btn-primary">
+                Generate Summary
+            </button>
+
+        </form>
+
+    </div>
+
+    <!-- Extracted Text -->
+
+    <div class="card p-4 mb-4">
+
+        <h3>Extracted Text</h3>
+
+        <textarea
+            class="form-control"
+            rows="10"
+            readonly
+        >{{ text }}</textarea>
+
+    </div>
+
+    <!-- Summary -->
+
+    <div class="card p-4 mb-4">
+
+        <h3>Summary</h3>
+
+        <p>
+            <strong>Summary Type:</strong>
+            {{ selected_summary_type|title }}
+        </p>
+
+        <div class="border rounded p-3 bg-light">
+            <pre style="white-space: pre-wrap;">{{ summary }}</pre>
+        </div>
+
+        <form action="{% url 'download_pdf' %}" method="get">
+
+            <input
+                type="hidden"
+                name="summary"
+                value="{{ summary }}"
+            >
+
+            <input
+                type="hidden"
+                name="keywords"
+                value="{{ keywords|join:', ' }}"
+            >
+
+            <button class="btn btn-success mt-3">
+                Download Summary PDF
+            </button>
+
+        </form>
+
+    </div>
+
+    <!-- Keywords -->
+
+    <div class="card p-4 mb-4">
+
+        <h3>Keywords</h3>
+
+        {% for keyword in keywords %}
+            <span class="badge bg-primary keyword-badge">
+                {{ keyword }}
+            </span>
+        {% empty %}
+            <p>No keywords available</p>
+        {% endfor %}
+
+    </div>
+
+    <!-- Question Answering -->
+
+    <div class="card p-4 mb-4">
+
+        <h3>Ask Questions About PDF</h3>
+
+        <form method="post">
+
+            {% csrf_token %}
+
+            <div class="mb-3">
+
+                <input
+                    type="text"
+                    name="question"
+                    class="form-control"
+                    placeholder="Ask a question from the uploaded PDF..."
+                    required
+                >
+
+            </div>
+
+            <button
+                type="submit"
+                class="btn btn-warning"
+            >
+                Get Answer
+            </button>
+
+        </form>
+
+        {% if answer %}
+
+            <hr>
+
+            <h5>Question</h5>
+
+            <div class="alert alert-secondary">
+                {{ question }}
+            </div>
+
+            <h5>Answer</h5>
+
+            <div class="alert alert-success">
+                <pre style="white-space: pre-wrap;">{{ answer }}</pre>
+            </div>
+
+            <h5 class="mt-3">Source Section Used</h5>
+
+            <div class="card border-primary">
+                <div class="card-body">
+                    <pre style="white-space: pre-wrap;">{{ source_context }}</pre>
+                </div>
+            </div>
+
+        {% endif %}
+
+    </div>
+
+    <!-- Features -->
+
+    <div class="card p-4">
+
+        <h3>Project Features</h3>
+
+        <ul>
+            <li>📄 PDF Upload & Processing</li>
+            <li>📝 Intelligent Text Extraction</li>
+            <li>📊 Document Statistics Analysis</li>
+            <li>🔑 Automatic Keyword Extraction</li>
+            <li>📚 Multiple Summary Modes (Short, Medium, Detailed)</li>
+            <li>🤖 AI-Powered Question Answering</li>
+            <li>🧠 Local LLM Integration using Ollama & Phi-3</li>
+            <li>🔍 Semantic Section Retrieval using TF-IDF</li>
+            <li>📖 Source Section Verification</li>
+            <li>🕒 Question & Answer History</li>
+            <li>📥 PDF Summary Report Download</li>
+            <li>⚡ Offline AI Processing</li>
+        </ul>
+
+    </div>
+
+    <!--History -->
+
+    {% if qa_history %}
+
+    <div class="card p-4 mb-4">
+
+    <h3>Question History</h3>
+
+    {% for item in qa_history %}
+
+        <div class="border rounded p-3 mb-3">
+
+            <strong>Q:</strong>
+
+            <p>{{ item.question }}</p>
+
+            <strong>A:</strong>
+
+            <p>{{ item.answer }}</p>
+
+        </div>
+
+    {% endfor %}
+
+</div>
+
+{% endif %}
+
+</div>
+
+
+
+</body>
+</html>
